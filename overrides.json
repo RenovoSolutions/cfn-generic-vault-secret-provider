@@ -1,0 +1,9 @@
+{
+    "CREATE": {
+        "/Server": "https://vault.example.com/",
+        "/SecretEngineMountPath": "secret",
+        "/SecretPath": "cfn-vault-secret-provider/test-event-super-secret-secret",
+        "/Token": "s.SoMeServIceT0ken",
+        "/SecretLength": 32
+    }
+}
