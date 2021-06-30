@@ -45,7 +45,7 @@ def create_handler(
             if model.SecretLength == 0:
                 model.SecretLength = 32
 
-            model.SecretData = f"'value={token_urlsafe(model.SecretLength)}', 'other=someothersecretstuff'"
+            model.SecretData = f"'value={token_urlsafe(model.SecretLength)}'"
 
         vault = VaultLib(model)
 
