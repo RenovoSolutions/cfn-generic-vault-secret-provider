@@ -1,3 +1,8 @@
+# WIP:
+## TODO:
+- Make sure configuration secrets can be stored in secrets manager. Look at examples of partnered providers to do so
+- Figure out why certain operations return no properties and create errors
+
 # Generic::Vault::Secret
 
 This repo implements a private custom CloudFormation resource using the CloudFormation Registry. The JSON schema, `generic-vault-secret.json`, includes the details about this resource and the resource handler code is included in `generic_vault_secret/handlers.py`. Some other code in this repo is auto generated. For example don't modify `models.py` by hand as any changes will be overwritten by the `cfn generate` or `cfn package` commands.
