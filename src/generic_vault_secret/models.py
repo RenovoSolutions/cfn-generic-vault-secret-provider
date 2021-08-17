@@ -35,15 +35,14 @@ class ResourceHandlerRequest(BaseResourceHandlerRequest):
     # pylint: disable=invalid-name
     desiredResourceState: Optional["ResourceModel"]
     previousResourceState: Optional["ResourceModel"]
+    typeConfiguration: Optional["TypeConfigurationModel"]
 
 
 @dataclass
 class ResourceModel(BaseModel):
     SecretPath: Optional[str]
     SecretData: Optional[str]
-    Server: Optional[str]
     SecretEngineMountPath: Optional[str]
-    Token: Optional[str]
     SecretLength: Optional[int]
     Version: Optional[int]
 
@@ -59,9 +58,7 @@ class ResourceModel(BaseModel):
         return cls(
             SecretPath=json_data.get("SecretPath"),
             SecretData=json_data.get("SecretData"),
-            Server=json_data.get("Server"),
             SecretEngineMountPath=json_data.get("SecretEngineMountPath"),
-            Token=json_data.get("Token"),
             SecretLength=json_data.get("SecretLength"),
             Version=json_data.get("Version"),
         )

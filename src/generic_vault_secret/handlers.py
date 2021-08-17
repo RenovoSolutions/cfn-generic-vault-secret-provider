@@ -20,6 +20,8 @@ import json
 
 # Use this logger to forward log messages to CloudWatch Logs.
 LOG = logging.getLogger(__name__)
+LOG.setLevel('INFO')
+
 TYPE_NAME = "Generic::Vault::Secret"
 
 resource = Resource(TYPE_NAME, ResourceModel)
@@ -32,22 +34,30 @@ def create_handler(
     callback_context: MutableMapping[str, Any],
 ) -> ProgressEvent:
     model = request.desiredResourceState
+    type_configuration = request.typeConfiguration
     progress: ProgressEvent = ProgressEvent(
         status=OperationStatus.IN_PROGRESS,
         resourceModel=model,
     )
 
-    print('INFO: Running creation handler.')
+    LOG.info('Running creation handler.')
 
     try:
         # If no secret is given then generate one.
-        if model.SecretData == None:
+        if model.SecretData == None or model.SecretData == '':
             if model.SecretLength == 0:
                 model.SecretLength = 32
 
             model.SecretData = f"'value={token_urlsafe(model.SecretLength)}'"
 
-        vault = VaultLib(model)
+        LOG.info(type_configuration)
+
+        vault = VaultLib(
+            model,
+            type_configuration.VaultConnection.Server,
+            type_configuration.VaultConnection.Token,
+            LOG
+        )
 
         response = vault.write_secret(model.SecretData)
 
@@ -69,15 +79,21 @@ def delete_handler(
     callback_context: MutableMapping[str, Any],
 ) -> ProgressEvent:
     model = request.desiredResourceState
+    type_configuration = request.typeConfiguration
     progress: ProgressEvent = ProgressEvent(
         status=OperationStatus.IN_PROGRESS,
         resourceModel=None,
     )
 
-    print('INFO: Running deletion handler.')
+    LOG.info('Running deletion handler.')
 
     try:
-        vault = VaultLib(model)
+        vault = VaultLib(
+            model,
+            type_configuration.VaultConnection.Server,
+            type_configuration.VaultConnection.Token,
+            LOG
+        )
 
         response = vault.read_secret_version(model.Version)
         if response.status_code == 404 and response.json()['data']['data'] == None:
@@ -101,12 +117,17 @@ def read_handler(
     callback_context: MutableMapping[str, Any],
 ) -> ProgressEvent:
     model = request.desiredResourceState
+    type_configuration = request.typeConfiguration
 
-
-    print('INFO: Running read handler.')
+    LOG.info(f'Running read handler.')
 
     try:
-        vault = VaultLib(model)
+        vault = VaultLib(
+            model,
+            type_configuration.VaultConnection.Server,
+            type_configuration.VaultConnection.Token,
+            LOG
+        )
 
         response = vault.read_secret_version(model.Version)
 
@@ -116,6 +137,7 @@ def read_handler(
         if response.status_code == 404 and response.json()['data']['data'] == None:
             return ProgressEvent.failed(HandlerErrorCode.NotFound, f"secret {model.SecretPath} version {model.Version} does not exist")
         else:
+            model.SecretData = response.json()['data']['data']
             return ProgressEvent(
                 status=OperationStatus.SUCCESS,
                 resourceModel=model,
