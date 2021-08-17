@@ -13,9 +13,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
     "Type" : "Generic::Vault::Secret",
     "Properties" : {
         "<a href="#secretpath" title="SecretPath">SecretPath</a>" : <i>String</i>,
-        "<a href="#server" title="Server">Server</a>" : <i>String</i>,
         "<a href="#secretenginemountpath" title="SecretEngineMountPath">SecretEngineMountPath</a>" : <i>String</i>,
-        "<a href="#token" title="Token">Token</a>" : <i>String</i>,
         "<a href="#secretlength" title="SecretLength">SecretLength</a>" : <i>Integer</i>,
     }
 }
@@ -27,9 +25,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 Type: Generic::Vault::Secret
 Properties:
     <a href="#secretpath" title="SecretPath">SecretPath</a>: <i>String</i>
-    <a href="#server" title="Server">Server</a>: <i>String</i>
     <a href="#secretenginemountpath" title="SecretEngineMountPath">SecretEngineMountPath</a>: <i>String</i>
-    <a href="#token" title="Token">Token</a>: <i>String</i>
     <a href="#secretlength" title="SecretLength">SecretLength</a>: <i>Integer</i>
 </pre>
 
@@ -45,16 +41,6 @@ _Type_: String
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
-#### Server
-
-The Vault server address. Like `https://vault.example.com/` for KV v2 secrets
-
-_Required_: Yes
-
-_Type_: String
-
-_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-
 #### SecretEngineMountPath
 
 The secret engine's mount path. For example KV v2 might be `secret`
@@ -63,17 +49,7 @@ _Required_: Yes
 
 _Type_: String
 
-_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-
-#### Token
-
-The Vault token to authorize to Vault with.
-
-_Required_: Yes
-
-_Type_: String
-
-_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+_Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
 #### SecretLength
 

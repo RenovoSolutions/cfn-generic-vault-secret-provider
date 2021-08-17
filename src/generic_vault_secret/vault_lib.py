@@ -9,16 +9,18 @@ class VaultLib():
     # See https://www.vaultproject.io/api#http-status-codes
     allowed_status_codes = [200, 204]
 
-    def __init__(self, model):
+    def __init__(self, model, server, token, log):
+        self.log = log
+        log.info(f'Model is: {model}')
+        log.info(f'Server is: {server}')
         self.model = copy(model)
-        self.model.Server = self.model.Server.strip("/")
-        self.model.SecretEngineMountPath = self.model.SecretEngineMountPath.strip("/")
-        self.auth = VaultLib.auth(self.model.Token)
+        self.server = server
+        self.auth = VaultLib.auth(token)
 
     def write_secret(self, secret_data):
-        request_url = f'{self.model.Server}/v1/{self.model.SecretEngineMountPath}/data/{self.model.SecretPath}'
+        request_url = f'{self.server}/v1/{self.model.SecretEngineMountPath}/data/{self.model.SecretPath}'
         
-        print(f'INFO: Writing secret: {request_url}')
+        self.log.info(f'Writing secret: {request_url}')
 
         prepared_secret_data = dict(item.strip("'").split("=") for item in secret_data.split("', '"))
 
@@ -26,14 +28,15 @@ class VaultLib():
             "data": prepared_secret_data
         }
 
-        print(f'INFO: Will create secrets: {json.dumps(secret_payload)}')
+        # local debug only
+        # self.log.info(f'Will create secrets: {json.dumps(secret_payload)}')
 
         response = requests.post(request_url, data=json.dumps(secret_payload), headers=self.auth)
 
         if not response.status_code in VaultLib.allowed_status_codes:
             VaultLib.error_helper(self, response, 'write')
         else:
-            print(f'INFO: Wrote secret: {response.status_code} {response.reason} {response.text}')
+            self.log.info(f'Wrote secret: {response.status_code} {response.reason} {response.text}')
 
         return response
 
@@ -42,30 +45,30 @@ class VaultLib():
             "versions": [version]
         }
 
-        request_url = f'{self.model.Server}/v1/{self.model.SecretEngineMountPath}/delete/{self.model.SecretPath}'
+        request_url = f'{self.server}/v1/{self.model.SecretEngineMountPath}/delete/{self.model.SecretPath}'
 
-        print(f'INFO: Deleting secret version {version}: {request_url}')
+        self.log.info(f'Deleting secret version {version}: {request_url}')
 
         response = requests.post(request_url, data=json.dumps(data), headers=self.auth)
 
         if not response.status_code in VaultLib.allowed_status_codes:
             VaultLib.error_helper(self, response, 'delete')
         else:
-            print(f'INFO: Deleted secret: {response.status_code} {response.reason} {response.text}')
+            self.log.info(f'Deleted secret: {response.status_code} {response.reason} {response.text}')
 
         return response
 
     def read_secret_version(self, version):
-        request_url = f'{self.model.Server}/v1/{self.model.SecretEngineMountPath}/data/{self.model.SecretPath}?version={version}'
+        request_url = f'{self.server}/v1/{self.model.SecretEngineMountPath}/data/{self.model.SecretPath}?version={version}'
 
-        print(f'INFO: Reading secret version {version}: {request_url}')
+        self.log.info(f'Reading secret version {version}: {request_url}')
 
         response = requests.get(request_url, headers=self.auth)
 
         if not response.status_code in VaultLib.allowed_status_codes:
             VaultLib.error_helper(self, response, 'read')
         else:
-            print(f'INFO: Read secret: {response.status_code} {response.reason}')
+            self.log.info(f'Read secret: {response.status_code} {response.reason}')
 
         return response
 
@@ -87,7 +90,6 @@ class VaultLib():
         if not token == None:
             headers = {'X-Vault-Token': token}
         else:
-            print('WARN: No authentication token was given.')
             # just a filler so requests doesn't error when using lambda plugin for vault
             headers = {'X-No-Token': 'NoToken'}
 
@@ -102,6 +104,6 @@ class VaultLib():
             "paths": f"{self.model.SecretEngineMountPath}/{action_path}/{self.model.SecretPath}"
         }
 
-        response = requests.post(f'{self.model.Server}/v1/sys/capabilities-self', data=json.dumps(data), headers=self.auth)
+        response = requests.post(f'{self.server}/v1/sys/capabilities-self', data=json.dumps(data), headers=self.auth)
 
         return response.json()['capabilities']
